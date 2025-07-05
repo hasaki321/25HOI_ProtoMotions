@@ -1,0 +1,36 @@
+# @package _global_
+
+defaults:
+  - ppo_mlp
+  - /env/box
+
+agent:
+  config:
+    task_reward_w: 1.0
+
+    modules:
+      box:
+        _target_: protomotions.agents.common.common.Flatten
+        num_in: ${env.config.box_params.obs_size}
+        num_out: ${.num_in}
+        config:
+          obs_key: box
+          normalize_obs: true
+          norm_clamp_value: 5
+
+    # Append the direction obs to the actor and critic inputs
+    model:
+      config: 
+        actor:
+          config:
+            mu_model:
+              config:
+                input_models:
+                  box: ${agent.config.modules.box}
+        critic:
+          config:
+            input_models:
+              box: ${agent.config.modules.box}
+
+    extra_inputs:
+      box: true
